@@ -1,0 +1,12 @@
+src
+runtime
+scripts
+tests
+coverage
+.vscode
+.DS_Store
+.eslintrc.cjs
+.prettierrc.json
+vitest.config.ts
+tsconfig.json
+.gitignore

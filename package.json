@@ -1,0 +1,60 @@
+{
+  "name": "nextjs-yandex-cloud-adapter",
+  "version": "1.0.0",
+  "description": "Next.js 16 deployment adapter that produces Yandex Cloud Functions bundles.",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "rimraf dist && tsc -p tsconfig.json && node scripts/copy-runtime.mjs",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "test": "vitest run",
+    "prepare": "npm run build"
+  },
+  "keywords": [
+    "nextjs",
+    "yandex-cloud",
+    "serverless",
+    "adapter"
+  ],
+  "author": "Yandex Cloud",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/chezzyderp/nextjs-yandex-cloud-adapter.git"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "peerDependencies": {
+    "next": "^16.0.0"
+  },
+  "dependencies": {
+    "archiver": "^5.3.2"
+  },
+  "devDependencies": {
+    "@types/adm-zip": "^0.5.7",
+    "@types/archiver": "^5.3.3",
+    "@types/node": "^20.11.30",
+    "@typescript-eslint/eslint-plugin": "^7.11.0",
+    "@typescript-eslint/parser": "^7.11.0",
+    "adm-zip": "^0.5.10",
+    "eslint": "^8.57.1",
+    "eslint-config-prettier": "^9.1.0",
+    "prettier": "^3.3.2",
+    "rimraf": "^5.0.7",
+    "typescript": "^5.4.5",
+    "vitest": "^1.5.0"
+  }
+}
