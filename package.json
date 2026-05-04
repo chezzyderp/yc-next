@@ -44,7 +44,11 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/chezzyderp/nextjs-yandex-cloud-adapter.git"
+    "url": "git+https://github.com/chezzyderp/yc-next.git"
+  },
+  "homepage": "https://github.com/chezzyderp/yc-next#readme",
+  "bugs": {
+    "url": "https://github.com/chezzyderp/yc-next/issues"
   },
   "engines": {
     "node": ">=18"
