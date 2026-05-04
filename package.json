@@ -17,7 +17,7 @@
   ],
   "scripts": {
     "build": "rimraf dist && tsc -p tsconfig.json && node scripts/copy-runtime.mjs",
-    "lint": "eslint .",
+    "lint": "eslint . --ext .ts,.tsx,.js,.cjs,.mjs",
     "format": "prettier --write .",
     "test": "vitest run",
     "prepare": "npm run build"
@@ -41,7 +41,9 @@
     "next": "^16.0.0"
   },
   "dependencies": {
-    "archiver": "^5.3.2"
+    "@aws-sdk/client-s3": "^3.654.0",
+    "archiver": "^5.3.2",
+    "dotenv": "^17.2.3"
   },
   "devDependencies": {
     "@types/adm-zip": "^0.5.7",

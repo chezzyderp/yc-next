@@ -4,5 +4,7 @@ coverage
 .vscode
 .DS_Store
 .next
-.env*
+.env
+.env.*
+!.env.example
 dist

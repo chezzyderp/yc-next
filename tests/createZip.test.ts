@@ -10,12 +10,14 @@ describe("createZip", () => {
     const dir = await createTempDir("zip");
     const source = path.join(dir, "source");
     const target = path.join(dir, "bundle.zip");
+
     await writeFile(path.join(source, "file.txt"), "hello");
 
     await createZip({ sourceDir: source, outputFile: target });
 
     const zip = new AdmZip(target);
     const entry = zip.getEntry("file.txt");
+
     expect(entry).toBeDefined();
     expect(zip.readAsText(entry!)).toBe("hello");
 

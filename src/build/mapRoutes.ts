@@ -24,7 +24,11 @@ export interface RouteMappingResult {
 
 const ROUTE_EXTENSIONS = new Set([".js", ".mjs", ".cjs"]);
 
-export default async function mapRoutes({ distDir }: { distDir: string }): Promise<RouteMappingResult> {
+export default async function mapRoutes({
+  distDir,
+}: {
+  distDir: string;
+}): Promise<RouteMappingResult> {
   const serverDir = distDir;
   const appDir = path.join(serverDir, "app");
   const apiDir = path.join(serverDir, "pages", "api");
@@ -40,38 +44,57 @@ export default async function mapRoutes({ distDir }: { distDir: string }): Promi
   ]);
 
   const routes = [...appRouteHandlers, ...appPages, ...apiRoutes, ...pagesRoutes];
+
   return { routes, middleware };
 }
 
 async function collectAppRouteHandlers(appDir: string, serverDir: string) {
-  if (!(await pathExists(appDir))) return [];
+  const exists = await pathExists(appDir);
+
+  if (!exists) {
+    return [];
+  }
+
   const files = await listMatchingFiles(appDir, (file) => isRouteFile(file, "route"));
+
   return files.map((file) =>
     buildRouteDefinition({
       absolutePath: file,
       relativeFile: path.relative(path.join(serverDir, "app"), file),
       prefix: "/",
       type: "app-route",
-    })
+    }),
   );
 }
 
 async function collectAppPages(appDir: string, serverDir: string) {
-  if (!(await pathExists(appDir))) return [];
+  const exists = await pathExists(appDir);
+
+  if (!exists) {
+    return [];
+  }
+
   const files = await listMatchingFiles(appDir, (file) => isRouteFile(file, "page"));
+
   return files.map((file) =>
     buildRouteDefinition({
       absolutePath: file,
       relativeFile: path.relative(path.join(serverDir, "app"), file),
       prefix: "/",
       type: "ssr-app",
-    })
+    }),
   );
 }
 
 async function collectApiRoutes(apiDir: string, serverDir: string) {
-  if (!(await pathExists(apiDir))) return [];
+  const exists = await pathExists(apiDir);
+
+  if (!exists) {
+    return [];
+  }
+
   const files = await listMatchingFiles(apiDir, (file) => ROUTE_EXTENSIONS.has(path.extname(file)));
+
   return files.map((file) =>
     buildRouteDefinition({
       absolutePath: file,
@@ -79,21 +102,41 @@ async function collectApiRoutes(apiDir: string, serverDir: string) {
       prefix: "/api",
       type: "api-route",
       appendFileSegment: true,
-    })
+    }),
   );
 }
 
 async function collectPagesSSR(pagesDir: string, serverDir: string) {
-  if (!(await pathExists(pagesDir))) return [];
+  const exists = await pathExists(pagesDir);
+
+  if (!exists) {
+    return [];
+  }
+
   const files = await listMatchingFiles(pagesDir, (file) => {
-    if (!ROUTE_EXTENSIONS.has(path.extname(file))) return false;
+    if (!ROUTE_EXTENSIONS.has(path.extname(file))) {
+      return false;
+    }
+
     const relative = path.relative(pagesDir, file);
-    if (relative.startsWith(`api${path.sep}`)) return false;
+
+    if (relative.startsWith(`api${path.sep}`)) {
+      return false;
+    }
+
     const base = path.basename(relative);
-    if (base.startsWith("_")) return false;
-    if (base === "middleware.js") return false;
+
+    if (base.startsWith("_")) {
+      return false;
+    }
+
+    if (base === "middleware.js") {
+      return false;
+    }
+
     return true;
   });
+
   return files.map((file) =>
     buildRouteDefinition({
       absolutePath: file,
@@ -101,12 +144,20 @@ async function collectPagesSSR(pagesDir: string, serverDir: string) {
       prefix: "/",
       type: "ssr-page",
       appendFileSegment: true,
-    })
+    }),
   );
 }
 
-async function collectMiddleware(manifestPath: string, serverDir: string): Promise<MiddlewareDefinition[]> {
-  if (!(await pathExists(manifestPath))) return [];
+async function collectMiddleware(
+  manifestPath: string,
+  serverDir: string,
+): Promise<MiddlewareDefinition[]> {
+  const exists = await pathExists(manifestPath);
+
+  if (!exists) {
+    return [];
+  }
+
   try {
     const raw = await fs.readFile(manifestPath, "utf8");
     const manifest = JSON.parse(raw);
@@ -116,8 +167,10 @@ async function collectMiddleware(manifestPath: string, serverDir: string): Promi
       files?: string[];
       matchers?: { regexp?: string }[];
     }[];
+
     return entries.map((entry) => {
       const files = (entry.files || []).map((file: string) => path.join(serverDir, file));
+
       return {
         name: entry.name,
         files,
@@ -132,25 +185,44 @@ async function collectMiddleware(manifestPath: string, serverDir: string): Promi
 
 async function listMatchingFiles(root: string, predicate: (file: string) => boolean) {
   const results: string[] = [];
-  if (!(await pathExists(root))) return results;
+  const exists = await pathExists(root);
+
+  if (!exists) {
+    return results;
+  }
+
   const stack = [root];
+
   while (stack.length) {
     const current = stack.pop()!;
     const entries = await fs.readdir(current, { withFileTypes: true });
+
     for (const entry of entries) {
       const fullPath = path.join(current, entry.name);
+
       if (entry.isDirectory()) {
         stack.push(fullPath);
         continue;
       }
-      if (!predicate(fullPath)) continue;
+
+      if (!predicate(fullPath)) {
+        continue;
+      }
+
       results.push(fullPath);
     }
   }
+
   return results;
 }
 
-function buildRouteDefinition({ absolutePath, relativeFile, prefix, type, appendFileSegment = false }: {
+function buildRouteDefinition({
+  absolutePath,
+  relativeFile,
+  prefix,
+  type,
+  appendFileSegment = false,
+}: {
   absolutePath: string;
   relativeFile: string;
   prefix: string;
@@ -160,6 +232,7 @@ function buildRouteDefinition({ absolutePath, relativeFile, prefix, type, append
   const segments = extractSegments(relativeFile, { appendFileSegment });
   const pathString = buildPathString(segments, prefix);
   const pattern = buildRegexFromSegments(segments, prefix);
+
   return {
     type,
     path: pathString,
@@ -168,41 +241,73 @@ function buildRouteDefinition({ absolutePath, relativeFile, prefix, type, append
   };
 }
 
-function extractSegments(relativeFile: string, { appendFileSegment }: { appendFileSegment: boolean }) {
+function extractSegments(
+  relativeFile: string,
+  { appendFileSegment }: { appendFileSegment: boolean },
+) {
   const pieces = relativeFile.split(path.sep);
   const fileName = pieces.pop() || "";
   const segments = pieces
     .map((segment) => {
-      if (!segment) return null;
-      if (segment.startsWith("@")) return null;
-      if (segment.startsWith("(") && segment.endsWith(")")) return null;
+      if (!segment) {
+        return null;
+      }
+
+      if (segment.startsWith("@")) {
+        return null;
+      }
+
+      if (segment.startsWith("(") && segment.endsWith(")")) {
+        return null;
+      }
+
       return segment;
     })
     .filter(Boolean) as string[];
 
   if (appendFileSegment) {
     const fileSegment = path.basename(fileName, path.extname(fileName));
-    if (fileSegment && fileSegment !== "index") segments.push(fileSegment);
+
+    if (fileSegment && fileSegment !== "index") {
+      segments.push(fileSegment);
+    }
   }
 
   return segments;
 }
 
 function buildPathString(segments: string[], prefix: string) {
-  if (!segments.length) return prefix === "/" ? "/" : normalizeSlashes(prefix);
+  if (!segments.length) {
+    return prefix === "/" ? "/" : normalizeSlashes(prefix);
+  }
+
   return normalizeSlashes(`${prefix}/${segments.join("/")}`);
 }
 
 function buildRegexFromSegments(segments: string[], prefix: string) {
   const prefixSegments = prefix === "/" ? [] : prefix.split("/").filter(Boolean);
   const combined = [...prefixSegments, ...segments];
-  if (!combined.length) return "^/?$";
+
+  if (!combined.length) {
+    return "^/?$";
+  }
+
   const parts = combined.map((segment) => {
-    if (isOptionalCatchAll(segment)) return "(?:/(.*))?";
-    if (isCatchAll(segment)) return "/(.+)";
-    if (isDynamicSegment(segment)) return "/([^/]+?)";
+    if (isOptionalCatchAll(segment)) {
+      return "(?:/(.*))?";
+    }
+
+    if (isCatchAll(segment)) {
+      return "/(.+)";
+    }
+
+    if (isDynamicSegment(segment)) {
+      return "/([^/]+?)";
+    }
+
     return `/${escapeRegex(segment)}`;
   });
+
   return `^${parts.join("")}/?$`;
 }
 
@@ -214,7 +319,12 @@ function normalizeSlashes(value: string) {
 }
 
 function isDynamicSegment(segment: string) {
-  return segment.startsWith("[") && segment.endsWith("]") && !segment.startsWith("[[...") && !segment.startsWith("[...");
+  return (
+    segment.startsWith("[") &&
+    segment.endsWith("]") &&
+    !segment.startsWith("[[...") &&
+    !segment.startsWith("[...")
+  );
 }
 
 function isCatchAll(segment: string) {
@@ -232,6 +342,7 @@ function escapeRegex(value: string) {
 async function pathExists(target: string) {
   try {
     await fs.access(target);
+
     return true;
   } catch (error) {
     return false;

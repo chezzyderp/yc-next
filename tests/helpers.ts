@@ -4,6 +4,7 @@ import path from "node:path";
 
 export async function createTempDir(prefix = "yc-adapter-test") {
   const dir = await fs.mkdtemp(path.join(os.tmpdir(), `${prefix}-`));
+
   return dir;
 }
 
