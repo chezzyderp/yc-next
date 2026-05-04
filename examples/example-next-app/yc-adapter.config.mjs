@@ -1,4 +1,4 @@
-import yandexCloudAdapter from "../../dist/index.js";
+import yandexCloudAdapter from "@yc-next/cli";
 
 export default yandexCloudAdapter({
   functionName: "example-app",

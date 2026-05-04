@@ -20,7 +20,7 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.0.5",
-    "nextjs-yandex-cloud-adapter": "file:../..",
+    "@yc-next/cli": "file:../..",
     "tailwindcss": "^4",
     "typescript": "^5"
   }

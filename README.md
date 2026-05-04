@@ -1,8 +1,11 @@
-# nextjs-yandex-cloud-adapter
+# @yc-next/cli
 
 [![CI](https://github.com/chezzyderp/yc-next/actions/workflows/ci.yml/badge.svg)](https://github.com/chezzyderp/yc-next/actions/workflows/ci.yml)
+[![npm](https://img.shields.io/npm/v/@yc-next/cli.svg)](https://www.npmjs.com/package/@yc-next/cli)
 
-Run a [Next.js 16](https://nextjs.org/) app on [Yandex Cloud Functions](https://yandex.cloud/services/functions). The package plugs into Next.js's experimental Deployment Adapter API, packages a self-contained bundle, and ships a CLI (`yc-next`) that creates the Cloud Function, sets up an API Gateway, and tears everything down again on demand.
+> Next.js 16 → Yandex Cloud Functions in one command.
+
+Run a [Next.js 16](https://nextjs.org/) app on [Yandex Cloud Functions](https://yandex.cloud/services/functions) — production-ready. The package plugs into Next.js's experimental Deployment Adapter API, packages a self-contained bundle, and ships a CLI (`yc-next`) that creates the Cloud Function, sets up an API Gateway, marks it publicly invokable, and tears everything down again on demand.
 
 ```bash
 npx next build
@@ -52,7 +55,7 @@ Five steps from zero to a public URL.
 ### 2. Install
 
 ```bash
-npm install nextjs-yandex-cloud-adapter --save-dev
+npm install @yc-next/cli --save-dev
 ```
 
 ### 3. Wire up the adapter
@@ -61,7 +64,7 @@ Create `yc-adapter.config.mjs` next to `next.config.ts`:
 
 ```js
 // yc-adapter.config.mjs
-import yandexCloudAdapter from "nextjs-yandex-cloud-adapter";
+import yandexCloudAdapter from "@yc-next/cli";
 
 export default yandexCloudAdapter({
   functionName: "my-next-app",
