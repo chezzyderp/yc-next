@@ -12,6 +12,14 @@ async function main() {
   await fs.rm(distRuntime, { recursive: true, force: true }).catch(() => {});
   await fs.mkdir(distRuntime, { recursive: true });
   await fs.cp(srcRuntime, distRuntime, { recursive: true });
+
+  const cliEntry = path.join(root, "dist", "cli", "index.js");
+
+  try {
+    await fs.chmod(cliEntry, 0o755);
+  } catch {
+    // CLI entry not built (e.g. partial tsconfig); ignore.
+  }
 }
 
 main().catch((error) => {

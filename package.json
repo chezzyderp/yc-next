@@ -12,6 +12,9 @@
     },
     "./package.json": "./package.json"
   },
+  "bin": {
+    "yc-next": "dist/cli/index.js"
+  },
   "files": [
     "dist"
   ],
@@ -23,12 +26,21 @@
     "prepare": "npm run build"
   },
   "keywords": [
+    "next",
+    "next.js",
     "nextjs",
+    "yandex",
     "yandex-cloud",
+    "yandexcloud",
+    "yc",
+    "yc-next",
     "serverless",
-    "adapter"
+    "cloud-functions",
+    "deployment",
+    "adapter",
+    "cli"
   ],
-  "author": "Yandex Cloud",
+  "author": "chezzyderp",
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -43,7 +55,9 @@
   "dependencies": {
     "@aws-sdk/client-s3": "^3.654.0",
     "archiver": "^5.3.2",
-    "dotenv": "^17.2.3"
+    "commander": "^14.0.3",
+    "dotenv": "^17.2.3",
+    "picocolors": "^1.1.1"
   },
   "devDependencies": {
     "@types/adm-zip": "^0.5.7",
