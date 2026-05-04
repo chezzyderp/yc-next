@@ -1,6 +1,8 @@
 # nextjs-yandex-cloud-adapter
 
-Run a [Next.js 16](https://nextjs.org/) app on [Yandex Cloud Functions](https://yandex.cloud/services/functions). The package plugs into Next.js's experimental Deployment Adapter API, packages a self-contained bundle, and ships a CLI that creates the Cloud Function, sets up an API Gateway, and tears everything down again on demand.
+[![CI](https://github.com/chezzyderp/yc-next/actions/workflows/ci.yml/badge.svg)](https://github.com/chezzyderp/yc-next/actions/workflows/ci.yml)
+
+Run a [Next.js 16](https://nextjs.org/) app on [Yandex Cloud Functions](https://yandex.cloud/services/functions). The package plugs into Next.js's experimental Deployment Adapter API, packages a self-contained bundle, and ships a CLI (`yc-next`) that creates the Cloud Function, sets up an API Gateway, and tears everything down again on demand.
 
 ```bash
 npx next build
