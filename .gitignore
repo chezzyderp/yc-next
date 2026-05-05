@@ -5,6 +5,7 @@ coverage
 .DS_Store
 .next
 .superpowers/
+.npm-cache/
 .env
 .env.*
 !.env.example

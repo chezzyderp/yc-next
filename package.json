@@ -22,11 +22,26 @@
     "dist"
   ],
   "scripts": {
+    "check:branch": "node scripts/check-branch-name.mjs",
     "build": "rimraf dist && tsc -p tsconfig.json && node scripts/copy-runtime.mjs",
+    "changeset": "changeset",
+    "ci": "npm run lint && npm run build && npm test",
     "lint": "eslint . --ext .ts,.tsx,.js,.cjs,.mjs",
+    "lint:commits": "node scripts/check-commit-range.mjs",
     "format": "prettier --write .",
     "test": "vitest run",
-    "prepare": "npm run build"
+    "prepare": "husky && npm run build",
+    "release": "changeset publish",
+    "version-packages": "changeset version"
+  },
+  "lint-staged": {
+    "*.{ts,tsx,js,mjs,cjs}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{json,md,yml,yaml}": [
+      "prettier --write"
+    ]
   },
   "keywords": [
     "next",
@@ -67,6 +82,9 @@
     "picocolors": "^1.1.1"
   },
   "devDependencies": {
+    "@changesets/cli": "^2.31.0",
+    "@commitlint/cli": "^20.5.3",
+    "@commitlint/config-conventional": "^20.5.3",
     "@types/adm-zip": "^0.5.7",
     "@types/archiver": "^5.3.3",
     "@types/node": "^20.11.30",
@@ -75,6 +93,8 @@
     "adm-zip": "^0.5.10",
     "eslint": "^8.57.1",
     "eslint-config-prettier": "^9.1.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.4.0",
     "prettier": "^3.3.2",
     "rimraf": "^5.0.7",
     "typescript": "^5.4.5",
