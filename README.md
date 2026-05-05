@@ -3,7 +3,7 @@
 [![CI](https://github.com/chezzyderp/yc-next/actions/workflows/ci.yml/badge.svg)](https://github.com/chezzyderp/yc-next/actions/workflows/ci.yml)
 [![npm](https://img.shields.io/npm/v/@yc-next/cli.svg)](https://www.npmjs.com/package/@yc-next/cli)
 
-![`@yc-next/cli` hero banner](./assets/readme/hero.webp)
+![`@yc-next/cli` hero banner](https://raw.githubusercontent.com/chezzyderp/yc-next/main/assets/readme/hero.webp)
 
 > Next.js → Yandex Cloud Functions in one command.
 
@@ -21,7 +21,7 @@ npx yc-next deploy
 
 The same single command takes a real Next.js app — App Router routes, API routes, server-rendered pages, middleware, and static assets — and ships it behind one Cloud Function URL, with no separate hosting tier and no manual `yc serverless` choreography.
 
-![What `@yc-next/cli` does](./assets/readme/what-it-does.webp)
+![What `@yc-next/cli` does](https://raw.githubusercontent.com/chezzyderp/yc-next/main/assets/readme/what-it-does.webp)
 
 ---
 
@@ -52,7 +52,7 @@ Five steps from zero to a public URL.
 
 At a glance, the deploy path looks like this:
 
-![Deploy flow illustration](./assets/readme/deploy-flow.webp)
+![Deploy flow illustration](https://raw.githubusercontent.com/chezzyderp/yc-next/main/assets/readme/deploy-flow.webp)
 
 ### 1. Prerequisites
 
