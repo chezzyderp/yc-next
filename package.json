@@ -1,7 +1,7 @@
 {
   "name": "@yc-next/cli",
   "version": "0.2.0",
-  "description": "Deploy a Next.js 16 app to Yandex Cloud Functions: a build adapter, a self-contained runtime, and a CLI to push everything live.",
+  "description": "Deploy Next.js to Yandex Cloud Functions with one command.",
   "publishConfig": {
     "access": "public"
   },
@@ -44,16 +44,21 @@
     ]
   },
   "keywords": [
-    "next",
-    "next.js",
     "nextjs",
+    "next.js",
+    "next",
     "yandex",
     "yandex-cloud",
-    "yandexcloud",
-    "yc",
-    "yc-next",
-    "serverless",
     "cloud-functions",
+    "serverless",
+    "deployment-adapter",
+    "api-gateway",
+    "react",
+    "nodejs",
+    "prisma",
+    "yc",
+    "yandexcloud",
+    "yc-next",
     "deployment",
     "adapter",
     "cli"

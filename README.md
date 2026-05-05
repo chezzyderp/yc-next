@@ -7,7 +7,7 @@
 
 > Next.js → Yandex Cloud Functions in one command.
 
-Run a [Next.js 16](https://nextjs.org/) app on [Yandex Cloud Functions](https://yandex.cloud/services/functions) — production-ready. The package plugs into Next.js's experimental Deployment Adapter API, packages a self-contained bundle, and ships a CLI (`yc-next`) that creates the Cloud Function, sets up an API Gateway, marks it publicly invokable, and tears everything down again on demand.
+Deploy [Next.js 16](https://nextjs.org/) to [Yandex Cloud Functions](https://yandex.cloud/services/functions) with one command. `@yc-next/cli` is a Next.js deployment adapter and CLI for Yandex Cloud that packages a self-contained bundle, creates the Cloud Function, wires an API Gateway, marks it publicly invokable, and tears everything down again on demand.
 
 ```bash
 npx next build
@@ -19,7 +19,7 @@ npx yc-next deploy
 # URL: https://d5dflufgm348hnrpnril.y3q8o1jq.apigw.yandexcloud.net
 ```
 
-The same single command takes a real Next.js app — App Router routes, API routes, server-rendered pages, middleware, and static assets — and ships it behind one Cloud Function URL, with no separate hosting tier and no manual `yc serverless` choreography.
+The same single command takes a real Next.js app — App Router routes, API routes, server-rendered pages, middleware, and static assets — and ships it behind one Yandex Cloud Function URL, with no separate hosting tier and no manual `yc serverless` choreography.
 
 ![What `@yc-next/cli` does](https://raw.githubusercontent.com/chezzyderp/yc-next/main/assets/readme/what-it-does.webp)
 
@@ -43,6 +43,12 @@ What's on the roadmap:
 - Custom domain attachment via Cert Manager
 - ISR / on-demand revalidation
 - GitHub Action wrapper
+
+If you are evaluating search terms like `deploy nextjs to yandex cloud`, `nextjs on yandex cloud functions`, or `prisma nextjs yandex cloud`, start with these docs:
+
+- [Deploy Next.js to Yandex Cloud Functions](./docs/deploy-nextjs-to-yandex-cloud.md)
+- [Running Next.js on Yandex Cloud Functions](./docs/nextjs-on-yandex-cloud-functions.md)
+- [Using Prisma with Next.js on Yandex Cloud](./docs/nextjs-prisma-yandex-cloud.md)
 
 ---
 
@@ -158,28 +164,28 @@ yc-next help [command]      Show usage for a specific command
 
 ### `yc-next deploy`
 
-| Flag | Default | Description |
-| ---- | ------- | ----------- |
-| `--manifest <path>` | `.next/yc/manifest.json` | Path to the manifest emitted by `next build`. |
-| `--memory <size>` | `1024m` | Per-function memory. |
-| `--timeout <duration>` | `30s` | Function execution timeout. |
-| `--runtime <name>` | `nodejs22` | YC runtime. Currently the only Node runtime available. |
-| `--entrypoint <name>` | `index.handler` | Handler entrypoint inside the ZIP. |
-| `--prefix <name>` | `next` | Function-name prefix for bundles without a preset name. |
-| `--bucket <name>` | `<functionName>-deploys` | Object Storage bucket for ZIP uploads. |
-| `--gateway-name <name>` | derived from manifest | Override API Gateway name. |
-| `--env <pair>` | repeatable | Runtime env var in `KEY=VALUE` form, shipped to every created function version. |
-| `--env-file <path>` | unset | Load runtime env vars from a dotenv-style file. |
-| `--no-gateway` | gateway on | Skip API Gateway setup (handy if you front the function with something else). |
-| `--no-public` | public on | Skip `allow-unauthenticated-invoke`; the URL will need an IAM token. |
-| `--force-object-storage` | off | Always upload via Object Storage, even for tiny ZIPs. |
+| Flag                     | Default                  | Description                                                                     |
+| ------------------------ | ------------------------ | ------------------------------------------------------------------------------- |
+| `--manifest <path>`      | `.next/yc/manifest.json` | Path to the manifest emitted by `next build`.                                   |
+| `--memory <size>`        | `1024m`                  | Per-function memory.                                                            |
+| `--timeout <duration>`   | `30s`                    | Function execution timeout.                                                     |
+| `--runtime <name>`       | `nodejs22`               | YC runtime. Currently the only Node runtime available.                          |
+| `--entrypoint <name>`    | `index.handler`          | Handler entrypoint inside the ZIP.                                              |
+| `--prefix <name>`        | `next`                   | Function-name prefix for bundles without a preset name.                         |
+| `--bucket <name>`        | `<functionName>-deploys` | Object Storage bucket for ZIP uploads.                                          |
+| `--gateway-name <name>`  | derived from manifest    | Override API Gateway name.                                                      |
+| `--env <pair>`           | repeatable               | Runtime env var in `KEY=VALUE` form, shipped to every created function version. |
+| `--env-file <path>`      | unset                    | Load runtime env vars from a dotenv-style file.                                 |
+| `--no-gateway`           | gateway on               | Skip API Gateway setup (handy if you front the function with something else).   |
+| `--no-public`            | public on                | Skip `allow-unauthenticated-invoke`; the URL will need an IAM token.            |
+| `--force-object-storage` | off                      | Always upload via Object Storage, even for tiny ZIPs.                           |
 
 ### `yc-next destroy`
 
-| Flag | Default | Description |
-| ---- | ------- | ----------- |
-| `--manifest-dir <path>` | `.next/yc` | Where `state.json` lives. |
-| `--yes` | dry-run | Required to actually delete. Without it the command only prints the plan and exits with code 2. |
+| Flag                    | Default    | Description                                                                                     |
+| ----------------------- | ---------- | ----------------------------------------------------------------------------------------------- |
+| `--manifest-dir <path>` | `.next/yc` | Where `state.json` lives.                                                                       |
+| `--yes`                 | dry-run    | Required to actually delete. Without it the command only prints the plan and exits with code 2. |
 
 ### Environment variables
 
@@ -211,20 +217,20 @@ Precedence is:
 
 ```ts
 yandexCloudAdapter({
-  oneFunction: true,        // emit one ZIP for the whole app (default)
-  functionName: "my-app",   // YC function name (also used as gateway prefix)
-  outputDir: ".next/yc",    // where bundles + manifest land
+  oneFunction: true, // emit one ZIP for the whole app (default)
+  functionName: "my-app", // YC function name (also used as gateway prefix)
+  outputDir: ".next/yc", // where bundles + manifest land
   includeStaticAssets: true, // bundle .next/static + public into the ZIP
-  runtimeEnv: []             // pass selected local env vars into the function
+  runtimeEnv: [], // pass selected local env vars into the function
 });
 ```
 
 ### `oneFunction: true | false`
 
-| Mode | Description |
-| ---- | ----------- |
-| `true` (default) | One ZIP serves the whole app behind a single Cloud Function. The most efficient option today. |
-| `false` | Emits one ZIP per detected route. Each ZIP currently duplicates the full standalone, so total upload size scales linearly with route count — only useful when YC settings (memory, timeout, concurrency) need to differ per endpoint. The API Gateway dispatches each path to its own function. |
+| Mode             | Description                                                                                                                                                                                                                                                                                     |
+| ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `true` (default) | One ZIP serves the whole app behind a single Cloud Function. The most efficient option today.                                                                                                                                                                                                   |
+| `false`          | Emits one ZIP per detected route. Each ZIP currently duplicates the full standalone, so total upload size scales linearly with route count — only useful when YC settings (memory, timeout, concurrency) need to differ per endpoint. The API Gateway dispatches each path to its own function. |
 
 In multi-mode, code-level isolation between routes is **not** enforced inside the function — every bundle still boots the full Next.js server and is technically capable of handling any route. The actual routing happens at the API Gateway layer. Per-route trimming via `.nft.json` is on the roadmap.
 
