@@ -3,7 +3,9 @@
 [![CI](https://github.com/chezzyderp/yc-next/actions/workflows/ci.yml/badge.svg)](https://github.com/chezzyderp/yc-next/actions/workflows/ci.yml)
 [![npm](https://img.shields.io/npm/v/@yc-next/cli.svg)](https://www.npmjs.com/package/@yc-next/cli)
 
-> Next.js 16 → Yandex Cloud Functions in one command.
+![`@yc-next/cli` hero banner](./assets/readme/hero.webp)
+
+> Next.js → Yandex Cloud Functions in one command.
 
 Run a [Next.js 16](https://nextjs.org/) app on [Yandex Cloud Functions](https://yandex.cloud/services/functions) — production-ready. The package plugs into Next.js's experimental Deployment Adapter API, packages a self-contained bundle, and ships a CLI (`yc-next`) that creates the Cloud Function, sets up an API Gateway, marks it publicly invokable, and tears everything down again on demand.
 
@@ -17,7 +19,9 @@ npx yc-next deploy
 # URL: https://d5dflufgm348hnrpnril.y3q8o1jq.apigw.yandexcloud.net
 ```
 
-The same single command serves App Router routes, API routes, server-rendered pages, middleware, `/_next/static/*` and `public/*` from one Cloud Function — no separate hosting for assets, no manual `yc serverless` invocations.
+The same single command takes a real Next.js app — App Router routes, API routes, server-rendered pages, middleware, and static assets — and ships it behind one Cloud Function URL, with no separate hosting tier and no manual `yc serverless` choreography.
+
+![What `@yc-next/cli` does](./assets/readme/what-it-does.webp)
 
 ---
 
@@ -45,6 +49,10 @@ What's on the roadmap:
 ## Quickstart
 
 Five steps from zero to a public URL.
+
+At a glance, the deploy path looks like this:
+
+![Deploy flow illustration](./assets/readme/deploy-flow.webp)
 
 ### 1. Prerequisites
 
@@ -114,6 +122,22 @@ npx yc-next deploy
 
 The build writes `.next/yc/manifest.json` with the bundles. `deploy` pushes them up, wires an API Gateway, marks the function publicly invokable, and prints the URL on the last line.
 
+If your app needs runtime env vars inside the deployed function, either declare them in the adapter:
+
+```js
+export default yandexCloudAdapter({
+  functionName: "my-next-app",
+  runtimeEnv: ["DATABASE_URL", "INTERNAL_API_URL"],
+});
+```
+
+or pass them directly at deploy time:
+
+```bash
+npx yc-next deploy --env DEMO_MESSAGE=hello
+npx yc-next deploy --env-file .env.production
+```
+
 To take it back down:
 
 ```bash
@@ -144,6 +168,8 @@ yc-next help [command]      Show usage for a specific command
 | `--prefix <name>` | `next` | Function-name prefix for bundles without a preset name. |
 | `--bucket <name>` | `<functionName>-deploys` | Object Storage bucket for ZIP uploads. |
 | `--gateway-name <name>` | derived from manifest | Override API Gateway name. |
+| `--env <pair>` | repeatable | Runtime env var in `KEY=VALUE` form, shipped to every created function version. |
+| `--env-file <path>` | unset | Load runtime env vars from a dotenv-style file. |
 | `--no-gateway` | gateway on | Skip API Gateway setup (handy if you front the function with something else). |
 | `--no-public` | public on | Skip `allow-unauthenticated-invoke`; the URL will need an IAM token. |
 | `--force-object-storage` | off | Always upload via Object Storage, even for tiny ZIPs. |
@@ -167,6 +193,18 @@ The CLI reads `.env` automatically.
 - `YC_STORAGE_REGION`, `YC_STORAGE_ENDPOINT` (only if you point at a non-default endpoint)
 - `YC_FUNCTION_PREFIX` (alternative to `--prefix`)
 
+Runtime env for the deployed app is separate from the CLI's own `.env`. Use one of these inputs:
+
+- `runtimeEnv` in `yc-adapter.config.*` for app env keys that should always be passed through from local `process.env`
+- `--env-file` for a deploy-time dotenv file
+- `--env` for one-off overrides
+
+Precedence is:
+
+1. `--env-file`
+2. `--env`
+3. adapter `runtimeEnv` keys from local `process.env`
+
 ---
 
 ## Adapter options
@@ -176,7 +214,8 @@ yandexCloudAdapter({
   oneFunction: true,        // emit one ZIP for the whole app (default)
   functionName: "my-app",   // YC function name (also used as gateway prefix)
   outputDir: ".next/yc",    // where bundles + manifest land
-  includeStaticAssets: true // bundle .next/static + public into the ZIP
+  includeStaticAssets: true, // bundle .next/static + public into the ZIP
+  runtimeEnv: []             // pass selected local env vars into the function
 });
 ```
 
@@ -208,6 +247,33 @@ You then need to:
 2. Re-run the build before redeploy so the inlined HTML references the new prefix.
 
 `/_next/static/*` filenames carry a content hash, so they can be served with `Cache-Control: public, max-age=31536000, immutable`. `public/*` filenames are user-supplied and should use a short cache-control unless you fingerprint them yourself.
+
+### `runtimeEnv: string[]`
+
+Use `runtimeEnv` when the deployed function should always receive a known set of env vars from the machine running `yc-next deploy`.
+
+```js
+export default yandexCloudAdapter({
+  functionName: "my-app",
+  runtimeEnv: ["DATABASE_URL", "UPSTASH_REDIS_REST_URL"],
+});
+```
+
+At build time the adapter records those keys into `.next/yc/manifest.json`. At deploy time the CLI reads the current local `process.env` values for those keys and adds them to `yc serverless function version create --environment ...`.
+
+If a declared key is missing locally, deployment continues and logs a warning.
+
+---
+
+## Production patterns
+
+- Keep secrets out of git. Store long-lived app secrets in a local `.env` or CI secret store, not in `yc-adapter.config.*`.
+- Use `runtimeEnv` for app-level keys that should almost always exist in production, such as `DATABASE_URL`.
+- Use `--env-file` when you want a deploy-specific env bundle, for example `.env.production`.
+- Use `--env` for one-off overrides and quick smoke checks.
+- Adapter-declared `runtimeEnv` wins on conflicts. That makes code configuration the source of truth for required pass-through keys.
+- For databases, remember this is serverless: keep connection counts low, prefer pooling where available, and avoid examples that open a large number of concurrent direct Postgres connections.
+- See [`examples/with-database`](./examples/with-database) for a minimal Prisma + PostgreSQL setup.
 
 ---
 

@@ -4,6 +4,7 @@ coverage
 .vscode
 .DS_Store
 .next
+.superpowers/
 .env
 .env.*
 !.env.example

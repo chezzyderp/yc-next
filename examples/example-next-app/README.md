@@ -1,36 +1,63 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# example-next-app
 
-## Getting Started
+Minimal smoke-test app for `@yc-next/cli`.
 
-First, run the development server:
+This example is intentionally small. It exists to verify that the adapter can:
+
+- build a Next.js 16 app into a YC-compatible bundle
+- serve App Router pages and API routes
+- receive runtime environment variables in production
+
+## Local development
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Build with the adapter
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+npm run build
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+That produces `.next/yc/manifest.json`, which `yc-next deploy` consumes.
 
-## Learn More
+## Runtime env verification
 
-To learn more about Next.js, take a look at the following resources:
+`yc-adapter.config.mjs` declares:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```js
+runtimeEnv: ["DATABASE_URL"]
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+The app also exposes `GET /api/echo-env`, which returns:
 
-## Deploy on Vercel
+- `DEMO_MESSAGE` from runtime env
+- `DATABASE_URL_SET` as a boolean
+- `NODE_ENV`
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+This route is meant for deploy-time verification without echoing secret values back to the client.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Example deploy flow from this directory:
+
+```bash
+npx next build
+DATABASE_URL=postgres://example npx yc-next deploy --env DEMO_MESSAGE=hello-from-yc
+```
+
+Then open:
+
+```text
+https://<gateway-domain>/api/echo-env
+```
+
+Expected shape:
+
+```json
+{
+  "DEMO_MESSAGE": "hello-from-yc",
+  "DATABASE_URL_SET": true,
+  "NODE_ENV": "production"
+}
+```

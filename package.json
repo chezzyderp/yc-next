@@ -1,6 +1,6 @@
 {
   "name": "@yc-next/cli",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Deploy a Next.js 16 app to Yandex Cloud Functions: a build adapter, a self-contained runtime, and a CLI to push everything live.",
   "publishConfig": {
     "access": "public"

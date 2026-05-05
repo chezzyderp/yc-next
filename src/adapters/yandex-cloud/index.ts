@@ -19,6 +19,17 @@ export interface YandexCloudAdapterOptions {
    * `assetPrefix` in `next.config`. Reduces bundle size noticeably for asset-heavy apps.
    */
   includeStaticAssets?: boolean;
+  /**
+   * Names of environment variables to ship into every deployed Yandex Cloud
+   * Function. Values are looked up from `process.env` at deploy time (so you
+   * can keep secrets out of the repo by using a local `.env` file). Names
+   * listed here are recorded in `manifest.json#runtimeEnvKeys` and the
+   * `yc-next` CLI propagates them via `--environment KEY=VAL` flags.
+   *
+   * Combine with the CLI's `--env`/`--env-file` flags as needed. Adapter
+   * declarations take precedence on conflicts.
+   */
+  runtimeEnv?: readonly string[];
 }
 
 interface BuildContext {
@@ -89,6 +100,7 @@ export default function yandexCloudAdapter(userOptions: YandexCloudAdapterOption
     functionName: "next-app",
     outputDir: ".next/yc",
     includeStaticAssets: true,
+    runtimeEnv: [],
     ...userOptions,
   };
 
@@ -198,6 +210,7 @@ export default function yandexCloudAdapter(userOptions: YandexCloudAdapterOption
         generatedAt: new Date().toISOString(),
         mode: options.oneFunction ? "single" : "multi",
         outputDir: resolvedOutput,
+        runtimeEnvKeys: dedupe(options.runtimeEnv),
         bundles,
       };
 
@@ -408,6 +421,10 @@ async function syncPublicAssets({
   const targetDir = path.join(standaloneDir, appDirRelative, "public");
 
   await fsp.cp(sourceDir, targetDir, { recursive: true, force: true });
+}
+
+function dedupe(values: readonly string[]): string[] {
+  return Array.from(new Set(values));
 }
 
 async function findServerJsDir(root: string): Promise<string | null> {

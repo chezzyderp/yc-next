@@ -24,6 +24,13 @@ program
   .option("--prefix <name>", "Function-name prefix when bundle has no preset name", process.env.YC_FUNCTION_PREFIX ?? "next")
   .option("--bucket <name>", "Object Storage bucket (default <function>-deploys)", process.env.YC_STORAGE_BUCKET)
   .option("--gateway-name <name>", "API Gateway name (default derived from manifest)")
+  .option(
+    "-e, --env <pair>",
+    "Runtime env var KEY=VALUE shipped to the function (repeatable)",
+    (value: string, prev: string[] = []) => [...prev, value],
+    [] as string[],
+  )
+  .option("--env-file <path>", "Path to a .env file with runtime env vars to ship to the function")
   .addOption(new Option("--no-gateway", "Skip API Gateway setup"))
   .addOption(new Option("--no-public", "Do not grant unauthenticated invoke access"))
   .addOption(new Option("--force-object-storage", "Always upload via Object Storage even for tiny ZIPs"))

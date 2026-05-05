@@ -1,7 +1,7 @@
 import yandexCloudAdapter from "@yc-next/cli";
 
 export default yandexCloudAdapter({
-  functionName: "example-app",
+  functionName: "with-database-example",
   outputDir: ".next/yc",
   runtimeEnv: ["DATABASE_URL"],
 });

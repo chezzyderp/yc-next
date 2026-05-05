@@ -1,0 +1,29 @@
+:root {
+  --bg: #f3efe7;
+  --card: rgba(255, 252, 246, 0.82);
+  --line: rgba(28, 37, 44, 0.12);
+  --text: #1c252c;
+  --muted: #52616d;
+  --accent: #0f766e;
+  --accent-strong: #115e59;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  background:
+    radial-gradient(circle at top, rgba(15, 118, 110, 0.18), transparent 32%),
+    linear-gradient(180deg, #f7f3eb 0%, #efe7da 100%);
+}
+
+body {
+  margin: 0;
+  color: var(--text);
+  font-family: Georgia, "Times New Roman", serif;
+}
+
+a {
+  color: inherit;
+}

@@ -1,6 +1,7 @@
 import path from "node:path";
 import { existsSync, readFileSync } from "node:fs";
 import { promises as fsp } from "node:fs";
+import dotenv from "dotenv";
 import {
   allowUnauthenticatedInvoke,
   ensureBucket,
@@ -27,6 +28,8 @@ export interface DeployOptions {
   gateway: boolean;
   public: boolean;
   forceObjectStorage?: boolean;
+  env: string[];
+  envFile?: string;
 }
 
 interface ManifestBundle {
@@ -43,6 +46,7 @@ interface Manifest {
   adapter: string;
   mode: "single" | "multi";
   outputDir: string;
+  runtimeEnvKeys?: string[];
   bundles: ManifestBundle[];
 }
 
@@ -65,6 +69,15 @@ export async function runDeploy(options: DeployOptions): Promise<void> {
   const folderId = process.env.YC_FOLDER_ID ?? readFolderIdFromYc();
   const cloudId = process.env.YC_CLOUD_ID;
   const ids = { folderId, cloudId };
+  const runtimeEnv = collectRuntimeEnv({
+    declaredKeys: manifest.runtimeEnvKeys ?? [],
+    envFile: options.envFile,
+    inline: options.env,
+  });
+
+  if (Object.keys(runtimeEnv).length) {
+    log.detail(`runtime env: ${Object.keys(runtimeEnv).sort().join(", ")}`);
+  }
 
   if (!folderId) {
     fail("YC_FOLDER_ID is not set and `yc config get folder-id` returned nothing.");
@@ -132,6 +145,10 @@ export async function runDeploy(options: DeployOptions): Promise<void> {
 
     if (process.env.YC_SERVICE_ACCOUNT_ID) {
       versionArgs.push("--service-account-id", process.env.YC_SERVICE_ACCOUNT_ID);
+    }
+
+    for (const [key, value] of Object.entries(runtimeEnv)) {
+      versionArgs.push("--environment", `${key}=${value}`);
     }
 
     const versionStatus = ycInherit(versionArgs);
@@ -303,6 +320,57 @@ function pickFallbackFunctionId(
   }
 
   return state.functions[0]!.id;
+}
+
+export function collectRuntimeEnv({
+  declaredKeys,
+  envFile,
+  inline,
+}: {
+  declaredKeys: string[];
+  envFile?: string;
+  inline: string[];
+}): Record<string, string> {
+  const result: Record<string, string> = {};
+
+  if (envFile) {
+    const resolved = path.resolve(process.cwd(), envFile);
+
+    if (!existsSync(resolved)) {
+      fail(`--env-file not found at ${resolved}`);
+    }
+
+    const parsed = dotenv.parse(readFileSync(resolved));
+
+    Object.assign(result, parsed);
+  }
+
+  for (const pair of inline) {
+    const eq = pair.indexOf("=");
+
+    if (eq <= 0) {
+      fail(`Invalid --env "${pair}", expected KEY=VALUE`);
+    }
+
+    const key = pair.slice(0, eq);
+    const value = pair.slice(eq + 1);
+
+    result[key] = value;
+  }
+
+  // declaredKeys (from adapter config) win — explicit code reference is the source of truth
+  for (const key of declaredKeys) {
+    const value = process.env[key];
+
+    if (value === undefined) {
+      log.warn(`runtimeEnv key ${key} declared in adapter config but not present in process.env (skipped).`);
+      continue;
+    }
+
+    result[key] = value;
+  }
+
+  return result;
 }
 
 function readFolderIdFromYc(): string | undefined {
